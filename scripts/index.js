@@ -95,14 +95,16 @@ app.post("/login", jsonParser, (req, res)=>{
                     httpOnly: false,
                     maxAge: 10*60*1000
                 })
+                console.log(rows[0]["profilePhotoUrl"]);
+                console.log(rows[0]["Reservation"]);
                 if(rows[0]["Reservation"]!=null){
-                    res.cookie("Reserv", rows[0]["Reservation"], {
+                    res.cookie("Reserve", rows[0]["Reservation"], {
                         httpOnly: false,
                         maxAge: 10*60*1000
                     })
                 }
-                if(rows[0]["ProfilePhotoUrl"]!=null){
-                    res.cookie("profilePhoto", rows[0]["ProfilePhotoUrl"], {
+                if(rows[0]["profilePhotoUrl"]!=null){
+                    res.cookie("profilePhoto", rows[0]["profilePhotoUrl"], {
                         httpOnly: false,
                         maxAge: 10*60*1000
                     })
@@ -120,7 +122,7 @@ app.post("/logout", (req,res)=>{
     res.cookie("Username", "", {
         maxAge: 0
     })
-    res.cookie("Reserv", "", {
+    res.cookie("reserv", "", {
         maxAge: 0
     })
     res.cookie("profilePhoto", "", {
@@ -131,20 +133,25 @@ app.post("/logout", (req,res)=>{
 })
 
 app.put("/makeReservation", jsonParser, (req,res)=>{ //Actualizar el campo de los detalles de reservacion del usuario
-    let usr = req.body.usr
+    let usr = req.body.usr.state
     let reservDetails = req.body.reservDetails
 
     let db = new sqlite3.Database("./database/appDB.db", (err)=>{
         if(err)console.log(err);
     })
 
-    db.run("UPDATE Users SET reservation=? WHERE Username=?", [reservDetails, usr], (err)=>{
+
+    db.run("UPDATE Users SET Reservation=? WHERE Username=?", [reservDetails, usr], (err)=>{
         if(err)console.log(err);
+
+        console.log(reservDetails);
+        console.log(usr);
 
         res.cookie("reserv", reservDetails, {
             httpOnly:false,
             maxAge: 10*60*1000
         })
+
         res.sendStatus(200)
     })
     
@@ -158,8 +165,13 @@ app.delete("/deleteReserv", jsonParser, (req,res)=>{
         if(err)console.log(err);
     })
 
-    db.run("UPDATE Users SET reservation=? WHERE Username=?", [null, usr], (err)=>{
+    db.run("UPDATE Users SET Reservation=? WHERE Username=?", [null, usr], (err)=>{
         if(err)console.log(err);
+
+
+        res.cookie("reserv", "", {
+            maxAge: 0
+        })
 
         res.sendStatus(200)
     })
@@ -292,8 +304,8 @@ app.listen(app.get("port"), ()=>{
     Porcentajes de participacion en el backend:
 
         Camilo Herrera 60%
-        Cristian Choperena 30%
-        Angelica Sanabria 5%
-        Yeison Mayorga 5%
+        Cristian Choperena 30% Colaboro en algunos endpoints como el de registrar la reserva o el de agregar las fotos de perfil
+        Angelica Sanabria 6%
+        Yeison Mayorga 1%
 
 */
