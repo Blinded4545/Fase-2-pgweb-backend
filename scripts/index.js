@@ -58,7 +58,7 @@ app.post("/reg", jsonParser, async (req,res)=>{
 
             db.run("INSERT INTO Users (Username, Password, Email) VALUES (?,?,?)", [usr, hash, emailCheck[0]], (err)=>{
                 if(err){
-                    return res.send(err)
+                    res.status(401).json({"message": "User or email alredy exists"})
                 }
 
                 res.sendStatus(200)
@@ -112,6 +112,9 @@ app.post("/login", jsonParser, (req, res)=>{
 
                 return res.sendStatus(200)
             }
+        }
+        else{
+            return res.status(401).json({"message": "User does not exists"})
         }
     })
 
