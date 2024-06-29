@@ -32,6 +32,11 @@ const jsonParser = bodyParser.json()
 
 app.set("port", 8000)
 
+
+//EN CASO DE NO EXISTIR LA BASE DE DATOS ANTES DE CORRER ESO, CORRER EL PROGRAMA Y REGISTRAR UN USUARIO 
+//"admin" con cualquier contraseña y correo, pero debe tener como usuario "admin" con todo en minusculas
+
+
 app.post("/reg", jsonParser, async (req,res)=>{
     let usr = req.body.usr
     let pwd = req.body.pwd
@@ -298,7 +303,65 @@ app.get("/getRecoveryCode", jsonParser, (req, res)=>{
 
 })
 
+
+app.post("/getAllInfo", jsonParser, (req, res)=>{
+    
+    let usr = req.body.usr
+
+    let db = new sqlite3.Database("./database/appDB.db", (err)=>{
+        if(err) console.log(err);
+    })
+
+    if(usr === "admin"){
+        db.all("SELECT * FROM Users", (err, rows)=>{
+            if(err){
+                console.log(err);
+            }
+
+            res.status(200).send(rows)
+        })
+    }
+
+})
+
+app.delete("/deleteRegistry", jsonParser, (req, res)=>{
+    let requester = req.body.requester
+    let usr = req.body.usr
+
+    if(requester === "admin"){
+        let db = new sqlite3.Database("./database/appDB.db", (err)=>{
+            if(err) console.log(err);
+        })
+    
+        db.run("DELETE FROM Users WHERE Username = ?", [usr], (err)=>{
+            if(err){
+                return res.status(404).json({"message": "The user has not been found"})
+            }
+    
+            return res.status(200).json({"message": "The user has been deleted correctly"})
+        })
+    }else{
+        return res.status(403).json({"message": "dont do it."})
+    }
+})
+
 app.listen(app.get("port"), ()=>{
+
+
+    let db = new sqlite3.Database("./database/appDB.db", (err)=>{
+        if(err) console.log(err);
+    })
+
+    //Esto es para asegurarme de que se crea la base de datos con su tabla perfectamente creada y el usuario admin ya creado
+    db.run("CREATE TABLE IF NOT EXISTS Users (Username STRING NOT NULL UNIQUE, Password STRING NOT NULL, Email STRING NOT NULL UNIQUE, Reservation STRING, profilePhotoUrl STRING, ChangeCode STRING)", (err)=>{
+        if(err){
+            console.log(err);
+            return
+        }
+
+        console.log("Table done");
+    })
+
     console.log("Running on port "+app.get("port"));
 })
 
