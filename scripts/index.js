@@ -130,7 +130,7 @@ app.post("/logout", (req,res)=>{
     res.cookie("Username", "", {
         maxAge: 0
     })
-    res.cookie("reserv", "", {
+    res.cookie("Reserv", "", {
         maxAge: 0
     })
     res.cookie("profilePhoto", "", {
@@ -155,7 +155,7 @@ app.put("/makeReservation", jsonParser, (req,res)=>{ //Actualizar el campo de lo
         console.log(reservDetails);
         console.log(usr);
 
-        res.cookie("reserv", reservDetails, {
+        res.cookie("Reserve", reservDetails, {
             httpOnly:false,
             maxAge: 10*60*1000
         })
@@ -167,18 +167,19 @@ app.put("/makeReservation", jsonParser, (req,res)=>{ //Actualizar el campo de lo
 })
 
 app.delete("/deleteReserv", jsonParser, (req,res)=>{
-    let usr = req.body.usr
+    let usr = req.body.usr.usrState
+
+    console.log("a");
 
     let db = new sqlite3.Database("./database/appDB.db", (err)=>{
         if(err)console.log(err);
     })
 
     db.run("UPDATE Users SET Reservation=? WHERE Username=?", [null, usr], (err)=>{
-        if(err)console.log(err);
+        if(err)console.log(err.message);
 
-
-        res.cookie("reserv", "", {
-            maxAge: 0
+        res.cookie("Reserve", "", {
+            maxAge: -1
         })
 
         res.sendStatus(200)
@@ -254,6 +255,29 @@ app.post("/recoveryMail", jsonParser, async (req,res)=>{
     db.close()
 })
 
+app.post("/checkCode", jsonParser, (req, res)=>{
+    let usr = req.body.usr
+    let code = req.body.code
+    
+    let db = new sqlite3.Database("./database/appDB.db", (err)=>{
+        if(err) console.log(err);
+    })
+
+    db.all("SELECT * FROM Users WHERE Username=?", [usr], (err, rows)=>{
+        if(err) console.log(err);
+
+        console.log("working");
+        if(rows.length==0){
+            res.sendStatus(403)
+            return
+        }
+
+        if(code === rows[0]["ChangeCode"]){
+            res.sendStatus(200)
+            return
+        }
+    })
+})
 
 //Con esto solo cambias la contraseña luego de encriptarla
 app.put("/changePassword", jsonParser, (req, res)=>{
@@ -271,12 +295,14 @@ app.put("/changePassword", jsonParser, (req, res)=>{
         db.run("UPDATE Users SET Password=? WHERE Username=?", [hash, usr], (err)=>{
             if(err)console.log(err);
     
+            console.log("Changed");
             res.sendStatus(200)
         })
+
+        db.close()
     })
     
     
-    db.close()
 })
 
 app.get("/getRecoveryCode", jsonParser, (req, res)=>{
@@ -369,9 +395,9 @@ app.listen(app.get("port"), ()=>{
     
     Porcentajes de participacion en el backend:
 
-        Camilo Herrera 60%
-        Cristian Choperena 30% Colaboro en algunos endpoints como el de registrar la reserva o el de agregar las fotos de perfil
-        Angelica Sanabria 6%
-        Yeison Mayorga 1%
+        Camilo Herrera 100%
+        Cristian Choperena 10% No estuvo tan activo durante la realizacion del backend, sin embargo hizo algunas contribuciones
+        Angelica Sanabria 100%
+        Yeison Mayorga 100%
 
 */
