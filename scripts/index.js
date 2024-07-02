@@ -396,7 +396,7 @@ app.listen(app.get("port"), ()=>{
     Porcentajes de participacion en el backend:
 
         Camilo Herrera 100%
-        Cristian Choperena 10% No estuvo tan activo durante la realizacion del backend, sin embargo hizo algunas contribuciones
+        Cristian Choperena 30% No estuvo tan activo durante la realizacion del backend, sin embargo hizo algunas contribuciones
         Angelica Sanabria 100%
         Yeison Mayorga 100%
 
